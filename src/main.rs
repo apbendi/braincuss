@@ -1,14 +1,21 @@
 fn main() {
-    let str_program = ".";
+    // print "!"
+    let str_program = "+++++ +++++ +++++ +++++ +++++ +++++ +++.";
 
     let program: Vec<char> = str_program.chars().collect();
-    let counter = 0;
+    let mut counter = 0;
 
-    let memory: Vec<u32> = vec![0; 30000];
+    let mut memory: Vec<u32> = vec![0; 30000];
     let pointer = 0;
 
-    if program[counter] == '.' {
-        print_memory(memory[pointer]);
+    while counter < str_program.len() {
+        if program[counter] == '.' {
+            print_memory(memory[pointer]);
+        } else if program[counter] == '+' {
+            memory[pointer] += 1;
+        }
+
+        counter += 1;
     }
 
     print!("\n");
