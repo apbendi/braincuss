@@ -1,3 +1,5 @@
+use std::io::Write;
+
 fn main() {
     // Test your bf programs at https://copy.sh/brainfuck/
 
@@ -47,11 +49,14 @@ fn main() {
     // let str_program = "[]]";
 
     // Hello World
-    let str_program = "
-        >++++++++[<+++++++++>-]<.>++++[<+++++++>-]<+.+++++++..+++.>>++++++[<+++++++>-]<+
-        +.------------.>++++++[<+++++++++>-]<+.<.+++.------.--------.>>>++++[<++++++++>-
-        ]<+.
-    ";
+    // let str_program = "
+    //     >++++++++[<+++++++++>-]<.>++++[<+++++++>-]<+.+++++++..+++.>>++++++[<+++++++>-]<+
+    //     +.------------.>++++++[<+++++++++>-]<+.<.+++.------.--------.>>>++++[<++++++++>-
+    //     ]<+.
+    // ";
+
+    // Read and print
+    let str_program = ",.,.";
 
 
     let program: Vec<char> = str_program.chars().collect();
@@ -85,6 +90,8 @@ fn main() {
             } else if memory[pointer] != 0 {
                 counter = *start;
             }
+        } else if program[counter] == ',' {
+            memory[pointer] = read_char();
         }
 
         counter += 1;
@@ -98,4 +105,21 @@ fn print_memory(mem: u32) {
         let c: char = char::from_u32_unchecked(mem);
         print!("{}", c);
     }
+
+    // Flush the buffer
+    std::io::stdout()
+        .flush()
+        .expect("Output Failed");
+}
+
+fn read_char() -> u32 {
+    print!("\n"); // Newline before taking input
+    let mut input_string = String::new();
+    let stdin = std::io::stdin();
+    stdin
+        .read_line(&mut input_string)
+        .expect("Read from stdin failed");
+
+    let first = input_string.chars().next().expect("Input Failed");
+    first as u32
 }
