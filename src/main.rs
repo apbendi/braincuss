@@ -3,13 +3,20 @@ fn main() {
     // let str_program = "+++++ +++++ +++++ +++++ +++++ +++++ +++.";
 
     // print "!" w/ minuses
-    let str_program = "+++++ - +++++ - +++++ +++++ +++++ +++++ +++++ +-.";
+    // let str_program = "+++++ - +++++ - +++++ +++++ +++++ +++++ +++++ +-.";
+
+    // print "HI" with two slots
+    let str_program = "
+        ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++.
+        >
+        ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ +++.
+    ";
 
     let program: Vec<char> = str_program.chars().collect();
     let mut counter = 0;
 
     let mut memory: Vec<u32> = vec![0; 30000];
-    let pointer = 0;
+    let mut pointer = 0;
 
     while counter < str_program.len() {
         if program[counter] == '.' {
@@ -18,6 +25,8 @@ fn main() {
             memory[pointer] += 1;
         } else if program[counter] == '-' {
             memory[pointer] -= 1;
+        } else if program[counter] == '>' {
+            pointer += 1;
         }
 
         counter += 1;
