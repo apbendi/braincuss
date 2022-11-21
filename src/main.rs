@@ -49,14 +49,14 @@ fn main() {
     // let str_program = "[]]";
 
     // Hello World
-    // let str_program = "
-    //     >++++++++[<+++++++++>-]<.>++++[<+++++++>-]<+.+++++++..+++.>>++++++[<+++++++>-]<+
-    //     +.------------.>++++++[<+++++++++>-]<+.<.+++.------.--------.>>>++++[<++++++++>-
-    //     ]<+.
-    // ";
+    let str_program = "
+        >++++++++[<+++++++++>-]<.>++++[<+++++++>-]<+.+++++++..+++.>>++++++[<+++++++>-]<+
+        +.------------.>++++++[<+++++++++>-]<+.<.+++.------.--------.>>>++++[<++++++++>-
+        ]<+.
+    ";
 
     // Read and print
-    let str_program = ",.,.";
+    // let str_program = ",.,.";
 
 
     let program: Vec<char> = str_program.chars().collect();
@@ -82,8 +82,8 @@ fn main() {
             loop_starts.push(counter);
         } else if program[counter] == ']' {
             let start = loop_starts
-                                    .last()
-                                    .expect("Syntax error: Unexpected closing bracket");
+                                .last()
+                                .expect("Syntax error: Unexpected closing bracket");
 
             if memory[pointer] == 0 {
                 loop_starts.pop();
@@ -120,6 +120,9 @@ fn read_char() -> u32 {
         .read_line(&mut input_string)
         .expect("Read from stdin failed");
 
-    let first = input_string.chars().next().expect("Input Failed");
+    let first = input_string
+                        .chars()
+                        .next()
+                        .expect("Input Failed");
     first as u32
 }
