@@ -1,65 +1,19 @@
-use std::io::Write;
+use std::io::{Write, Read};
 
+// Test your bf programs at https://copy.sh/brainfuck/
 fn main() {
-    // Test your bf programs at https://copy.sh/brainfuck/
+    let args: Vec<String> = std::env::args().collect();
+    println!("args {:?}", args);
 
-    // print "!"
-    // let str_program = "+++++ +++++ +++++ +++++ +++++ +++++ +++.";
+    if args.len() != 2 {
+        println!("Usage: braincuss <PROGRAM_FILE>");
+        std::process::exit(0);
+    }
 
-    // print "!" w/ minuses
-    // let str_program = "+++++ - +++++ - +++++ +++++ +++++ +++++ +++++ +-.";
+    let file_path = &args[1];
+    let program = read_source(file_path);
 
-    // print "HI" with two slots
-    // let str_program = "
-    //     ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++.
-    //     >
-    //     ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ +++.
-    // ";
-
-    // print "HI" with back and forward movement
-    // let str_program = "
-    //     ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ +++
-    //     >
-    //     ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++.
-    //     < .
-    // ";
-
-    // Prints "54321"
-    // let str_program = "
-    //     ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ +++
-    //     > +++++
-    //     [<.->-]
-    // ";
-
-    // Prints "555444333222111" w/ nested loops
-    // let str_program = "
-    //     ++++++++++ ++++++++++ ++++++++++ ++++++++++ ++++++++++ +++
-    //     > +++++
-    //     [
-    //     > +++
-    //     [<<.>>-]
-    //     <<-
-    //     >-
-    //     ]
-    // ";
-
-    // Syntax errors (these should fail)
-    // let str_program = "]";
-    // let str_program = "++]";
-    // let str_program = "[]]";
-
-    // Hello World
-    let str_program = "
-        >++++++++[<+++++++++>-]<.>++++[<+++++++>-]<+.+++++++..+++.>>++++++[<+++++++>-]<+
-        +.------------.>++++++[<+++++++++>-]<+.<.+++.------.--------.>>>++++[<++++++++>-
-        ]<+.
-    ";
-
-    // Read and print
-    // let str_program = ",.,.";
-
-
-    let program: Vec<char> = str_program.chars().collect();
+    let program: Vec<char> = program.chars().collect();
     let mut counter = 0;
 
     let mut memory: Vec<u32> = vec![0; 30000];
@@ -67,7 +21,7 @@ fn main() {
 
     let mut loop_starts: Vec<usize> = Vec::new();
 
-    while counter < str_program.len() {
+    while counter < program.len() {
         if program[counter] == '.' {
             print_memory(memory[pointer]);
         } else if program[counter] == '+' {
@@ -98,6 +52,20 @@ fn main() {
     }
 
     print!("\n");
+}
+
+fn read_source(path: &String) -> String {
+    match std::fs::File::open(path) {
+        Ok (mut file) => {
+            let mut contents = String::new();
+            file.read_to_string(&mut contents).unwrap();
+            contents
+        },
+        Err(error) => {
+            println!("Error opening file {}", error);
+            std::process::exit(1);
+        }
+    }
 }
 
 fn print_memory(mem: u32) {
