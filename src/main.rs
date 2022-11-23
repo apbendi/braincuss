@@ -16,7 +16,7 @@ fn main() {
     let program: Vec<char> = program.chars().collect();
     let mut counter = 0;
 
-    let mut memory: Vec<u32> = vec![0; 30000];
+    let mut memory: Vec<u8> = vec![0; 30000];
     let mut pointer = 0;
 
     let mut loop_starts: Vec<usize> = Vec::new();
@@ -25,15 +25,54 @@ fn main() {
         if program[counter] == '.' {
             print_memory(memory[pointer]);
         } else if program[counter] == '+' {
-            memory[pointer] += 1;
+            if memory[pointer] == 255 {
+                memory[pointer] = 0;
+            } else {
+                memory[pointer] += 1;
+            }
         } else if program[counter] == '-' {
-            memory[pointer] -= 1;
+            if memory[pointer] == 0 {
+                memory[pointer] = 255
+            } else {
+                memory[pointer] -= 1;
+            }
         } else if program[counter] == '>' {
             pointer += 1;
+            if pointer == memory.len() {
+                pointer = 0;
+            }
         } else if program[counter] == '<' {
-            pointer -= 1;
+            if pointer == 0 {
+                pointer = memory.len() - 1;
+            } else {
+                pointer -= 1;
+            }
         } else if program[counter] == '[' {
-            loop_starts.push(counter);
+            if memory[pointer] == 0 {
+                let mut inner_loop_counter = 0;
+                // We've hit a loop but the pointer is already zero, so we don't
+                // execute the loop even once—skip straight to the close of the loop.
+                loop {
+                    counter += 1;
+                    if program[counter] == '[' {
+                        // we entered an inner loop
+                        inner_loop_counter += 1;
+                    } else if program[counter] == ']' {
+                        if inner_loop_counter > 0 {
+                            // we're exiting an inner loop
+                            inner_loop_counter -= 1;
+                        } else {
+                            // we're exiting the initial loop
+                            break;
+                        }
+                    } else if counter == program.len() - 1 {
+                        // bracket was never closed, should error?
+                        break;
+                    }
+                }
+            } else {
+                loop_starts.push(counter);
+            }
         } else if program[counter] == ']' {
             let start = loop_starts
                                 .last()
@@ -43,6 +82,7 @@ fn main() {
                 loop_starts.pop();
             } else if memory[pointer] != 0 {
                 counter = *start;
+
             }
         } else if program[counter] == ',' {
             memory[pointer] = read_char();
@@ -68,9 +108,9 @@ fn read_source(path: &String) -> String {
     }
 }
 
-fn print_memory(mem: u32) {
+fn print_memory(mem: u8) {
     unsafe {
-        let c: char = char::from_u32_unchecked(mem);
+        let c: char = char::from_u32_unchecked(mem as u32);
         print!("{}", c);
     }
 
@@ -80,7 +120,7 @@ fn print_memory(mem: u32) {
         .expect("Output Failed");
 }
 
-fn read_char() -> u32 {
+fn read_char() -> u8 {
     print!("\n"); // Newline before taking input
     let mut input_string = String::new();
     let stdin = std::io::stdin();
@@ -92,5 +132,5 @@ fn read_char() -> u32 {
                         .chars()
                         .next()
                         .expect("Input Failed");
-    first as u32
+    first as u8
 }
