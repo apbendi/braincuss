@@ -94,10 +94,7 @@ fn read_source(path: &String) -> String {
 }
 
 fn print_as_char(mem: u8) {
-    unsafe {
-        let c: char = char::from_u32_unchecked(mem as u32);
-        print!("{}", c);
-    }
+    print!("{}", mem as char);
 
     // Flush the buffer
     std::io::stdout()
