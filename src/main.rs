@@ -1,4 +1,5 @@
-use std::io::{Write, Read};
+use std::io::{Read, Write};
+mod vm;
 
 // Test your bf programs at https://copy.sh/brainfuck/
 fn main() {
@@ -16,39 +17,23 @@ fn main() {
     let program: Vec<char> = program.chars().collect();
     let mut counter = 0;
 
-    let mut memory: Vec<u8> = vec![0; 30000];
-    let mut pointer = 0;
+    let mut vm = vm::Machine::with_memory_size(30_000);
 
     let mut loop_starts: Vec<usize> = Vec::new();
 
     while counter < program.len() {
         if program[counter] == '.' {
-            print_memory(memory[pointer]);
+            print_as_char(vm.read_memory());
         } else if program[counter] == '+' {
-            if memory[pointer] == 255 {
-                memory[pointer] = 0;
-            } else {
-                memory[pointer] += 1;
-            }
+           vm.increment_memory();
         } else if program[counter] == '-' {
-            if memory[pointer] == 0 {
-                memory[pointer] = 255
-            } else {
-                memory[pointer] -= 1;
-            }
+            vm.decrement_memory();
         } else if program[counter] == '>' {
-            pointer += 1;
-            if pointer == memory.len() {
-                pointer = 0;
-            }
+            vm.advance_pointer();
         } else if program[counter] == '<' {
-            if pointer == 0 {
-                pointer = memory.len() - 1;
-            } else {
-                pointer -= 1;
-            }
+            vm.reverse_pointer();
         } else if program[counter] == '[' {
-            if memory[pointer] == 0 {
+            if vm.read_memory() == 0 {
                 let mut inner_loop_counter = 0;
                 // We've hit a loop but the pointer is already zero, so we don't
                 // execute the loop even once—skip straight to the close of the loop.
@@ -78,14 +63,14 @@ fn main() {
                                 .last()
                                 .expect("Syntax error: Unexpected closing bracket");
 
-            if memory[pointer] == 0 {
+            if vm.read_memory() == 0 {
                 loop_starts.pop();
-            } else if memory[pointer] != 0 {
+            } else if vm.read_memory() != 0 {
                 counter = *start;
 
             }
         } else if program[counter] == ',' {
-            memory[pointer] = read_char();
+            vm.write_memory(read_char());
         }
 
         counter += 1;
@@ -108,7 +93,7 @@ fn read_source(path: &String) -> String {
     }
 }
 
-fn print_memory(mem: u8) {
+fn print_as_char(mem: u8) {
     unsafe {
         let c: char = char::from_u32_unchecked(mem as u32);
         print!("{}", c);
