@@ -14,35 +14,32 @@ fn main() {
     let file_path = &args[1];
     let program = read_source(file_path);
 
-    let program: Vec<char> = program.chars().collect();
-    let mut counter = 0;
-
-    let mut vm = vm::Machine::with_memory_size(30_000);
+    let mut vm = vm::Machine::with_memory_size_and_program(30_000, &program);
 
     let mut loop_starts: Vec<usize> = Vec::new();
 
-    while counter < program.len() {
-        if program[counter] == '.' {
+    while !vm.end_of_program() {
+        if vm.instruction() == '.' {
             print_as_char(vm.read_memory());
-        } else if program[counter] == '+' {
+        } else if vm.instruction() == '+' {
            vm.increment_memory();
-        } else if program[counter] == '-' {
+        } else if vm.instruction() == '-' {
             vm.decrement_memory();
-        } else if program[counter] == '>' {
+        } else if vm.instruction() == '>' {
             vm.advance_pointer();
-        } else if program[counter] == '<' {
+        } else if vm.instruction() == '<' {
             vm.reverse_pointer();
-        } else if program[counter] == '[' {
+        } else if vm.instruction() == '[' {
             if vm.read_memory() == 0 {
                 let mut inner_loop_counter = 0;
                 // We've hit a loop but the pointer is already zero, so we don't
                 // execute the loop even once—skip straight to the close of the loop.
                 loop {
-                    counter += 1;
-                    if program[counter] == '[' {
+                    vm.advance_pc();
+                    if vm.instruction() == '[' {
                         // we entered an inner loop
                         inner_loop_counter += 1;
-                    } else if program[counter] == ']' {
+                    } else if vm.instruction() == ']' {
                         if inner_loop_counter > 0 {
                             // we're exiting an inner loop
                             inner_loop_counter -= 1;
@@ -50,15 +47,15 @@ fn main() {
                             // we're exiting the initial loop
                             break;
                         }
-                    } else if counter == program.len() - 1 {
+                    } else if vm.end_of_program() {
                         // bracket was never closed, should error?
                         break;
                     }
                 }
             } else {
-                loop_starts.push(counter);
+                loop_starts.push(vm.pc());
             }
-        } else if program[counter] == ']' {
+        } else if vm.instruction() == ']' {
             let start = loop_starts
                                 .last()
                                 .expect("Syntax error: Unexpected closing bracket");
@@ -66,14 +63,14 @@ fn main() {
             if vm.read_memory() == 0 {
                 loop_starts.pop();
             } else if vm.read_memory() != 0 {
-                counter = *start;
+                vm.jump(*start);
 
             }
-        } else if program[counter] == ',' {
+        } else if vm.instruction() == ',' {
             vm.write_memory(read_char());
         }
 
-        counter += 1;
+        vm.advance_pc();
     }
 
     print!("\n");
