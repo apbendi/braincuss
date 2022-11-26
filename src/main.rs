@@ -27,64 +27,64 @@ fn main() {
     let mut loop_starts: Vec<usize> = Vec::new();
 
     while !vm.end_of_program() {
-        if vm.instruction() == '.' {
-            print_as_char(vm.read_memory());
-        } else if vm.instruction() == '+' {
-           vm.increment_memory();
-        } else if vm.instruction() == '-' {
-            vm.decrement_memory();
-        } else if vm.instruction() == '>' {
-            vm.advance_pointer();
-        } else if vm.instruction() == '<' {
-            vm.reverse_pointer();
-        } else if vm.instruction() == '[' {
-            if vm.read_memory() == 0 {
-                let mut inner_loop_counter = 0;
-                // We've hit a loop but the pointer is already zero, so we don't
-                // execute the loop even once—skip straight to the close of the loop.
-                loop {
-                    vm.advance_pc();
-                    if vm.instruction() == '[' {
-                        // we entered an inner loop
-                        inner_loop_counter += 1;
-                    } else if vm.instruction() == ']' {
-                        if inner_loop_counter > 0 {
-                            // we're exiting an inner loop
-                            inner_loop_counter -= 1;
-                        } else {
-                            // we're exiting the initial loop
+        match vm.instruction() {
+            '+' => vm.increment_memory(),
+            '-' => vm.decrement_memory(),
+            '>' => vm.advance_pointer(),
+            '<' => vm.reverse_pointer(),
+            '.' => print_as_char(vm.read_memory()),
+            ',' => {
+                let byte: u8;
+
+                if input_pointer == program_input.len() {
+                    byte = 0;
+                } else {
+                    byte = program_input[input_pointer] as u8;
+                    input_pointer += 1;
+                }
+
+                vm.write_memory(byte);
+            },
+            '[' => {
+                if vm.read_memory() == 0 {
+                    let mut inner_loop_counter = 0;
+                    // We've hit a loop but the pointer is already zero, so we don't
+                    // execute the loop even once—skip straight to the close of the loop.
+                    loop {
+                        vm.advance_pc();
+                        if vm.instruction() == '[' {
+                            // we entered an inner loop
+                            inner_loop_counter += 1;
+                        } else if vm.instruction() == ']' {
+                            if inner_loop_counter > 0 {
+                                // we're exiting an inner loop
+                                inner_loop_counter -= 1;
+                            } else {
+                                // we're exiting the initial loop
+                                break;
+                            }
+                        } else if vm.end_of_program() {
+                            // bracket was never closed, should error?
                             break;
                         }
-                    } else if vm.end_of_program() {
-                        // bracket was never closed, should error?
-                        break;
                     }
+                } else {
+                    loop_starts.push(vm.pc());
                 }
-            } else {
-                loop_starts.push(vm.pc());
-            }
-        } else if vm.instruction() == ']' {
-            let start = loop_starts
+            },
+            ']' => {
+                let start = loop_starts
                                 .last()
                                 .expect("Syntax error: Unexpected closing bracket");
 
-            if vm.read_memory() == 0 {
-                loop_starts.pop();
-            } else if vm.read_memory() != 0 {
-                vm.jump(*start);
+                if vm.read_memory() == 0 {
+                    loop_starts.pop();
+                } else if vm.read_memory() != 0 {
+                    vm.jump(*start);
 
+                }
             }
-        } else if vm.instruction() == ',' {
-            let byte: u8;
-
-            if input_pointer == program_input.len() {
-                byte = 0;
-            } else {
-                byte = program_input[input_pointer] as u8;
-                input_pointer += 1;
-            }
-
-            vm.write_memory(byte);
+            _ => (),
         }
 
         vm.advance_pc();
