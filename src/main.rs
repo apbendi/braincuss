@@ -4,15 +4,23 @@ mod vm;
 // Test your bf programs at https://copy.sh/brainfuck/
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    println!("args {:?}", args);
 
-    if args.len() != 2 {
-        println!("Usage: braincuss <PROGRAM_FILE>");
+    let input_arg: String;
+
+    if args.len() == 2 {
+        input_arg = String::from("");
+    } else if args.len() == 3 {
+        input_arg = args[2].clone(); // way to do this w/o cloning?
+    } else {
+        println!("Usage: braincuss <PROGRAM_FILE> [INPUT");
         std::process::exit(0);
     }
 
     let file_path = &args[1];
     let program = read_source(file_path);
+
+    let program_input: Vec<char> = input_arg.chars().collect();
+    let mut input_pointer: usize = 0;
 
     let mut vm = vm::Machine::with_memory_size_and_program(30_000, &program);
 
@@ -67,7 +75,16 @@ fn main() {
 
             }
         } else if vm.instruction() == ',' {
-            vm.write_memory(read_char());
+            let byte: u8;
+
+            if input_pointer == program_input.len() {
+                byte = 0;
+            } else {
+                byte = program_input[input_pointer] as u8;
+                input_pointer += 1;
+            }
+
+            vm.write_memory(byte);
         }
 
         vm.advance_pc();
@@ -84,7 +101,7 @@ fn read_source(path: &String) -> String {
             contents
         },
         Err(error) => {
-            println!("Error opening file {}", error);
+            println!("Error opening file {}: {}", path, error);
             std::process::exit(1);
         }
     }
@@ -97,19 +114,4 @@ fn print_as_char(mem: u8) {
     std::io::stdout()
         .flush()
         .expect("Output Failed");
-}
-
-fn read_char() -> u8 {
-    print!("\n"); // Newline before taking input
-    let mut input_string = String::new();
-    let stdin = std::io::stdin();
-    stdin
-        .read_line(&mut input_string)
-        .expect("Read from stdin failed");
-
-    let first = input_string
-                        .chars()
-                        .next()
-                        .expect("Input Failed");
-    first as u8
 }
