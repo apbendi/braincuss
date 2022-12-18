@@ -12,7 +12,7 @@ fn main() {
         2 => input_arg = String::from(""),
         3 => input_arg = args[2].clone(), // way to do this w/o cloning?
         _ => {
-            println!("Usage: braincuss <PROGRAM_FILE> [INPUT");
+            println!("Usage: braincuss <PROGRAM_FILE> [INPUT]");
             std::process::exit(0);
         }
     }
