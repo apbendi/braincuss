@@ -1,6 +1,6 @@
 use crate::vm::Machine;
 
-pub fn run(program: &String, input: &String, print_fn: &dyn Fn(u8)) {
+pub fn run(program: &String, input: &String, print_fn: &mut dyn FnMut(u8)) {
     let program_input: Vec<char> = input.chars().collect();
     let mut input_pointer: usize = 0;
 
@@ -70,5 +70,24 @@ pub fn run(program: &String, input: &String, print_fn: &dyn Fn(u8)) {
         }
 
         vm.advance_pc();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn print_exclamation() {
+        let mut output: Vec<char> = vec![' '; 0];
+        let mut test_print = |mem: u8| {
+            output.push(mem as char);
+        };
+
+        let program = String::from("+++++ +++++ +++++ +++++ +++++ +++++ +++.");
+
+        run(&program, &String::from(""), &mut test_print);
+
+        assert_eq!(output[0], '!');
     }
 }

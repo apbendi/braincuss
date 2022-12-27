@@ -180,7 +180,7 @@ mod tests {
         machine.advance_pointer();
         assert_eq!(machine.memory[1], machine.read_memory());
 
-        for n in 0..1000 {
+        for _ in 0..1000 {
             machine.increment_memory();
             assert_eq!(machine.memory[1], machine.read_memory());
         }

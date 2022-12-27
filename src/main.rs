@@ -20,7 +20,7 @@ fn main() {
     let file_path = &args[1];
     let program = read_source(file_path);
 
-    interpreter::run(&program, &input_arg, &print_as_char);
+    interpreter::run(&program, &input_arg, &mut print_as_char);
 
     // trailing newline for terminal
     print!("\n");
